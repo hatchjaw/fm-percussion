@@ -32,5 +32,9 @@
 *.app
 
 # JUCE stuff
+**/JUCE
 **/Builds
 **/JuceLibraryCode
+
+# cmake stuff
+**/cmake-build-debug

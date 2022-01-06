@@ -14,11 +14,11 @@
 //==============================================================================
 /**
 */
-class FmpercussionAudioProcessorEditor  : public juce::AudioProcessorEditor
+class PercussionFMAudioProcessorEditor  : public juce::AudioProcessorEditor
 {
 public:
-    FmpercussionAudioProcessorEditor (FmpercussionAudioProcessor&);
-    ~FmpercussionAudioProcessorEditor() override;
+    PercussionFMAudioProcessorEditor (PercussionFMAudioProcessor&);
+    ~PercussionFMAudioProcessorEditor() override;
 
     //==============================================================================
     void paint (juce::Graphics&) override;
@@ -27,7 +27,7 @@ public:
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
-    FmpercussionAudioProcessor& audioProcessor;
+    PercussionFMAudioProcessor& audioProcessor;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FmpercussionAudioProcessorEditor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PercussionFMAudioProcessorEditor)
 };

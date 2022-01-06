@@ -8,9 +8,14 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "Voices/FMBellSound.h"
+#include "Voices/FMBellVoice.h"
+#include "Oscillators/FMOsc.h"
+#include "defines.h"
+#include "Voices/FMVoice.h"
 
 //==============================================================================
-FmpercussionAudioProcessor::FmpercussionAudioProcessor()
+PercussionFMAudioProcessor::PercussionFMAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
      : AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
@@ -22,19 +27,29 @@ FmpercussionAudioProcessor::FmpercussionAudioProcessor()
                        )
 #endif
 {
+    fmSynth.addSound(new FMBellSound());
+
+    for (int i = 0; i < NUM_VOICES; ++i) {
+        auto voice = new FMVoice();
+        auto carrier = new FMOsc();
+        carrier->addModulator(new FMOsc());
+        voice->setCarrier(carrier);
+        fmSynth.addVoice(voice);
+//        fmSynth.addVoice(new FMBellVoice(new FMOsc()));
+    }
 }
 
-FmpercussionAudioProcessor::~FmpercussionAudioProcessor()
+PercussionFMAudioProcessor::~PercussionFMAudioProcessor()
 {
 }
 
 //==============================================================================
-const juce::String FmpercussionAudioProcessor::getName() const
+const juce::String PercussionFMAudioProcessor::getName() const
 {
     return JucePlugin_Name;
 }
 
-bool FmpercussionAudioProcessor::acceptsMidi() const
+bool PercussionFMAudioProcessor::acceptsMidi() const
 {
    #if JucePlugin_WantsMidiInput
     return true;
@@ -43,7 +58,7 @@ bool FmpercussionAudioProcessor::acceptsMidi() const
    #endif
 }
 
-bool FmpercussionAudioProcessor::producesMidi() const
+bool PercussionFMAudioProcessor::producesMidi() const
 {
    #if JucePlugin_ProducesMidiOutput
     return true;
@@ -52,7 +67,7 @@ bool FmpercussionAudioProcessor::producesMidi() const
    #endif
 }
 
-bool FmpercussionAudioProcessor::isMidiEffect() const
+bool PercussionFMAudioProcessor::isMidiEffect() const
 {
    #if JucePlugin_IsMidiEffect
     return true;
@@ -61,50 +76,55 @@ bool FmpercussionAudioProcessor::isMidiEffect() const
    #endif
 }
 
-double FmpercussionAudioProcessor::getTailLengthSeconds() const
+double PercussionFMAudioProcessor::getTailLengthSeconds() const
 {
     return 0.0;
 }
 
-int FmpercussionAudioProcessor::getNumPrograms()
+int PercussionFMAudioProcessor::getNumPrograms()
 {
     return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
                 // so this should be at least 1, even if you're not really implementing programs.
 }
 
-int FmpercussionAudioProcessor::getCurrentProgram()
+int PercussionFMAudioProcessor::getCurrentProgram()
 {
     return 0;
 }
 
-void FmpercussionAudioProcessor::setCurrentProgram (int index)
+void PercussionFMAudioProcessor::setCurrentProgram (int index)
 {
 }
 
-const juce::String FmpercussionAudioProcessor::getProgramName (int index)
+const juce::String PercussionFMAudioProcessor::getProgramName (int index)
 {
     return {};
 }
 
-void FmpercussionAudioProcessor::changeProgramName (int index, const juce::String& newName)
+void PercussionFMAudioProcessor::changeProgramName (int index, const juce::String& newName)
 {
 }
 
 //==============================================================================
-void FmpercussionAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
+void PercussionFMAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
+    fmSynth.setCurrentPlaybackSampleRate(sampleRate);
+
+    for (int i = 0; i < fmSynth.getNumVoices(); ++i) {
+        if (auto voice = dynamic_cast<FMVoice *>(fmSynth.getVoice(i))) {
+            voice->prepareToPlay(sampleRate, samplesPerBlock, this->getTotalNumOutputChannels());
+        }
+    }
 }
 
-void FmpercussionAudioProcessor::releaseResources()
+void PercussionFMAudioProcessor::releaseResources()
 {
     // When playback stops, you can use this as an opportunity to free up any
     // spare memory, etc.
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
-bool FmpercussionAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
+bool PercussionFMAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
   #if JucePlugin_IsMidiEffect
     juce::ignoreUnused (layouts);
@@ -129,7 +149,7 @@ bool FmpercussionAudioProcessor::isBusesLayoutSupported (const BusesLayout& layo
 }
 #endif
 
-void FmpercussionAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+void PercussionFMAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
     auto totalNumInputChannels  = getTotalNumInputChannels();
@@ -150,34 +170,36 @@ void FmpercussionAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     // the samples and the outer loop is handling the channels.
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
-    {
-        auto* channelData = buffer.getWritePointer (channel);
+//    for (int channel = 0; channel < totalNumInputChannels; ++channel)
+//    {
+//        auto* channelData = buffer.getWritePointer (channel);
+//
+//        // ..do something to the data...
+//    }
 
-        // ..do something to the data...
-    }
+    fmSynth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
 }
 
 //==============================================================================
-bool FmpercussionAudioProcessor::hasEditor() const
+bool PercussionFMAudioProcessor::hasEditor() const
 {
     return true; // (change this to false if you choose to not supply an editor)
 }
 
-juce::AudioProcessorEditor* FmpercussionAudioProcessor::createEditor()
+juce::AudioProcessorEditor* PercussionFMAudioProcessor::createEditor()
 {
-    return new FmpercussionAudioProcessorEditor (*this);
+    return new PercussionFMAudioProcessorEditor (*this);
 }
 
 //==============================================================================
-void FmpercussionAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
+void PercussionFMAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
 }
 
-void FmpercussionAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
+void PercussionFMAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
@@ -187,5 +209,5 @@ void FmpercussionAudioProcessor::setStateInformation (const void* data, int size
 // This creates new instances of the plugin..
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
-    return new FmpercussionAudioProcessor();
+    return new PercussionFMAudioProcessor();
 }

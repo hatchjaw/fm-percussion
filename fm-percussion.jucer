@@ -1,11 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="tSLF1C" name="fm-percussion" projectType="audioplug" useAppConfig="0"
+<JUCERPROJECT id="tSLF1C" name="PercussionFM" projectType="audioplug" useAppConfig="0"
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" version="0.0.1"
               pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn"
               pluginManufacturer="TAR" pluginManufacturerCode="TarQ" pluginCode="Tr11">
-  <MAINGROUP id="JA1Nms" name="fm-percussion">
+  <MAINGROUP id="JA1Nms" name="PercussionFM">
     <GROUP id="{E49D9007-AA7A-F25D-26D6-3942488EE46B}" name="Source">
+      <GROUP id="{96D24103-F694-1E0A-5737-D9E72908903B}" name="Envelopes">
+        <FILE id="nAcrum" name="OADEnv.cpp" compile="1" resource="0" file="Source/Envelopes/OADEnv.cpp"/>
+        <FILE id="PnqDCu" name="OADEnv.h" compile="0" resource="0" file="Source/Envelopes/OADEnv.h"/>
+      </GROUP>
+      <FILE id="nr7L8i" name="defines.h" compile="0" resource="0" file="Source/defines.h"/>
+      <GROUP id="{55D28272-002D-71BD-DB80-8C4CF5C66BE0}" name="Oscillators">
+        <FILE id="SftJJw" name="FMOsc.cpp" compile="1" resource="0" file="Source/Oscillators/FMOsc.cpp"/>
+        <FILE id="k1a9zZ" name="FMOsc.h" compile="0" resource="0" file="Source/Oscillators/FMOsc.h"/>
+      </GROUP>
+      <GROUP id="{D0B8B32E-D7FD-E06A-B7E3-7C8D9ABDDBAE}" name="Voices">
+        <FILE id="Xtu5Ky" name="FMBellSound.h" compile="0" resource="0" file="Source/Voices/FMBellSound.h"/>
+        <FILE id="miwNdl" name="FMBellVoice.cpp" compile="1" resource="0" file="Source/Voices/FMBellVoice.cpp"/>
+        <FILE id="xS4XSd" name="FMBellVoice.h" compile="0" resource="0" file="Source/Voices/FMBellVoice.h"/>
+        <FILE id="aFo8Jj" name="FMVoice.cpp" compile="1" resource="0" file="Source/Voices/FMVoice.cpp"/>
+        <FILE id="BZV0de" name="FMVoice.h" compile="0" resource="0" file="Source/Voices/FMVoice.h"/>
+      </GROUP>
+      <GROUP id="{6809EF8C-8E70-E3C8-177A-2212C3534935}" name="UI"/>
       <FILE id="LCXeOm" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="W6wbrm" name="PluginProcessor.h" compile="0" resource="0"

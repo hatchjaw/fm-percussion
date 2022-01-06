@@ -13,12 +13,12 @@
 //==============================================================================
 /**
 */
-class FmpercussionAudioProcessor  : public juce::AudioProcessor
+class PercussionFMAudioProcessor  : public juce::AudioProcessor
 {
 public:
     //==============================================================================
-    FmpercussionAudioProcessor();
-    ~FmpercussionAudioProcessor() override;
+    PercussionFMAudioProcessor();
+    ~PercussionFMAudioProcessor() override;
 
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
@@ -54,6 +54,8 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
 private:
+    juce::Synthesiser fmSynth;
+    static juce::AudioProcessorValueTreeState::ParameterLayout createParams();
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FmpercussionAudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PercussionFMAudioProcessor)
 };
