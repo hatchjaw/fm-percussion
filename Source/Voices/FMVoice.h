@@ -16,6 +16,8 @@
 
 class FMVoice : public juce::SynthesiserVoice {
 public:
+    ~FMVoice() override;
+
     void setCarrier(FMOsc* newCarrier);
 
     bool canPlaySound(juce::SynthesiserSound *sound) override;

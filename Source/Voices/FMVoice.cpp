@@ -11,6 +11,12 @@
 #include "FMVoice.h"
 #include "FMBellSound.h"
 
+FMVoice::~FMVoice() {
+    // I'm certain there's a better way than this... I think carrier should be
+    // a unique_ptr, but I don't know how to use those properly.
+    delete carrier;
+}
+
 bool FMVoice::canPlaySound(juce::SynthesiserSound *sound) {
     return dynamic_cast<FMBellSound *>(sound) != nullptr;
 }
@@ -67,13 +73,13 @@ void FMVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int startS
     juce::dsp::AudioBlock<float> audioBlock{this->buffer};
 
     this->carrier->computeNextBlock(this->buffer, 0, this->buffer.getNumSamples());
-    // Maybe just use the oscillator's envelope
+    // Maybe just use the oscillator's envelope?...
 //    this->envelope.applyEnvelopeToBuffer(this->buffer, 0, this->buffer.getNumSamples());
 
     for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel) {
         outputBuffer.addFrom(channel, startSample, this->buffer, channel, 0, numSamples);
 
-        if (!this->envelope.isActive()) {
+        if (!this->carrier->isActive()) {
             this->clearCurrentNote();
             this->carrier->reset();
         }

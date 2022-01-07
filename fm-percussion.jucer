@@ -22,7 +22,14 @@
         <FILE id="aFo8Jj" name="FMVoice.cpp" compile="1" resource="0" file="Source/Voices/FMVoice.cpp"/>
         <FILE id="BZV0de" name="FMVoice.h" compile="0" resource="0" file="Source/Voices/FMVoice.h"/>
       </GROUP>
-      <GROUP id="{6809EF8C-8E70-E3C8-177A-2212C3534935}" name="UI"/>
+      <GROUP id="{6809EF8C-8E70-E3C8-177A-2212C3534935}" name="UI">
+        <FILE id="WrLVqd" name="ScopeComponent.h" compile="0" resource="0"
+              file="Source/UI/ScopeComponent.h"/>
+        <FILE id="dlYgu1" name="ScopeOnOffComponent.cpp" compile="1" resource="0"
+              file="Source/UI/ScopeOnOffComponent.cpp"/>
+        <FILE id="TXQIP7" name="ScopeOnOffComponent.h" compile="0" resource="0"
+              file="Source/UI/ScopeOnOffComponent.h"/>
+      </GROUP>
       <FILE id="LCXeOm" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="W6wbrm" name="PluginProcessor.h" compile="0" resource="0"

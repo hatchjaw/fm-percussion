@@ -15,7 +15,7 @@
 
 class FMOsc {
 public:
-    void addModulator(FMOsc *modulator);
+    void addModulator(FMOsc *modulatorToAdd);
 
     void prepareToPlay(juce::dsp::ProcessSpec &spec);
 
@@ -29,15 +29,19 @@ public:
 
     void reset();
 
-    enum MMFMMode {
-        PARALLEL,
-        SERIES
+    enum FMMode {
+        LINEAR,
+        EXPONENTIAL
     };
+
+    bool isActive();
+
 protected:
 
 private:
     juce::OwnedArray<FMOsc> modulators;
-    MMFMMode mode{ SERIES };
+
+    FMMode mode{EXPONENTIAL};
 
     double sampleRate{0.0};
 

@@ -10,8 +10,8 @@
 
 #include "FMOsc.h"
 
-void FMOsc::addModulator(FMOsc *modulator) {
-    modulators.add(modulator);
+void FMOsc::addModulator(FMOsc *modulatorToAdd) {
+    modulators.add(modulatorToAdd);
 }
 
 void FMOsc::prepareToPlay(juce::dsp::ProcessSpec &spec) {
@@ -35,7 +35,16 @@ float FMOsc::computeNextSample() {
         modulation += modulator->computeNextSample();
     }
 
-    sample = (float) (this->amplitude * std::sin(this->currentAngle + modulation));
+    switch (mode) {
+        case LINEAR:
+            sample = (float) (this->amplitude * std::sin(this->currentAngle + modulation));
+            break;
+        case EXPONENTIAL:
+            sample = (float) (this->amplitude * std::sin(this->currentAngle * pow(2, modulation)));
+            break;
+        default:
+            jassertfalse;
+    }
 
     this->currentAngle += this->angleDelta;
 
@@ -73,7 +82,7 @@ void FMOsc::setupNote(double sampleRate, double frequency, float noteAmplitude) 
 
     this->envelope.noteOn();
 
-    this->setupModulators(sampleRate, 550, 10 * noteAmplitude * 550, 5.f);
+    this->setupModulators(sampleRate, 550, .001 * noteAmplitude * 550, 5.f);
 
 //    if (this->modulator) {
 //        this->modulator->adsr.noteOn();
@@ -86,4 +95,8 @@ void FMOsc::setupModulators(double sampleRate, double frequency, double peakDevi
         modulator->envelope.setParameters(0.0f, 0.0f, decay);
         modulator->envelope.noteOn();
     }
+}
+
+bool FMOsc::isActive() {
+    return this->envelope.isActive();
 }
