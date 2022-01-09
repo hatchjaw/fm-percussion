@@ -32,24 +32,24 @@ float FMOsc::computeNextSample() {
     // For 0 modulators this is an unmodulated oscillator.
     // For 1 modulator this will either be basic FM or, if the modulator has modulators of its own, series MMFM.
     // For >1 modulators this will be parallel MMFM.
-    // TODO: feedback FM
     for (auto &modulator: modulators) {
         modulation += modulator.computeNextSample();
     }
 
     switch (mode) {
         case LINEAR:
-            sample = (float) (this->amplitude * std::sin(this->currentAngle + modulation));
+            sample = (float) (this->amplitude * std::sin(this->currentAngle + modulation + (feedback * prevSample)));
             break;
         case EXPONENTIAL:
-            sample = (float) (this->amplitude * std::sin(this->currentAngle * pow(2, modulation)));
+            sample = (float) (this->amplitude *
+                              std::sin(this->currentAngle * pow(2, modulation) + (feedback * prevSample)));
             break;
         default:
             jassertfalse;
     }
 
     this->currentAngle += this->angleDelta;
-
+    prevSample = sample;
     return this->envelope.getNextSample() * sample;
 }
 
@@ -107,7 +107,9 @@ bool FMOsc::isActive() {
 void FMOsc::setEnvelope(OADEnv::Parameters &newParams) {
     this->envelope.setParameters(newParams);
     for (auto &modulator: modulators) {
-        modulator.setEnvelope(newParams);
+        if (!modulator.envelopeSet) {
+            modulator.setEnvelope(newParams);
+        }
     }
 }
 

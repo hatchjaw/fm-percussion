@@ -23,7 +23,7 @@ public:
 
         Parameters(FMOsc::FMMode carrierModeToUse,
                    std::vector<FMOsc::Parameters> modulatorSettingsToUse,
-                   OADEnv::Parameters &envParamsToUse)
+                   OADEnv::Parameters *envParamsToUse)
                 : carrierMode(carrierModeToUse),
                   modulatorSettings(std::move(modulatorSettingsToUse)),
                   envParams(envParamsToUse) {
@@ -31,7 +31,7 @@ public:
 
         FMOsc::FMMode carrierMode;
         std::vector<FMOsc::Parameters> modulatorSettings;
-        OADEnv::Parameters envParams;
+        OADEnv::Parameters *envParams;
     };
 
     ~FMVoice() override;

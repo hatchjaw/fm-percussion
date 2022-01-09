@@ -12,6 +12,7 @@
 #include "PluginProcessor.h"
 #include "UI/ScopeComponent.h"
 #include "UI/ScopeOnOffComponent.h"
+#include "UI/PatchSelectorComponent.h"
 
 //==============================================================================
 /**
@@ -32,6 +33,7 @@ private:
     PercussionFMAudioProcessor& audioProcessor;
     ScopeComponent<float> scopeComponent;
     ScopeOnOffComponent scopeOnOffComponent;
+    PatchSelectorComponent patchSelectorComponent;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PercussionFMAudioProcessorEditor)
 };

@@ -33,20 +33,14 @@ ScopeOnOffComponent::~ScopeOnOffComponent()
 
 void ScopeOnOffComponent::paint (juce::Graphics& g)
 {
-    /* This demo code just fills the component's background and
-       draws some placeholder text to get you started.
-
-       You should replace everything in this method with your own
-       drawing code..
-    */
-
-    g.setColour (juce::Colours::grey);
-    g.drawRect (getLocalBounds(), 1);
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));   // clear the background
+
+//    g.setColour (juce::Colours::grey);
+//    g.drawRect (getLocalBounds(), 1);
 }
 
 void ScopeOnOffComponent::resized()
 {
-    scopeOnOffLabel.setBounds(10, 10, getWidth() / 2, getHeight());
+    scopeOnOffLabel.setBounds(0, 0, getWidth() / 2, getHeight());
     scopeOnOffButton.setBounds(scopeOnOffLabel.getRight(), scopeOnOffLabel.getY(), getWidth() / 2, getHeight());
 }

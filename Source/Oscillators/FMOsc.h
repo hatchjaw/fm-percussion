@@ -46,10 +46,8 @@ public:
     };
 
     struct Parameters {
-//        Parameters() = default;
-
         /**
-         * Constructor to use for modulation proportional wrt carrier frequency
+         * Constructor to use for modulation proportional to carrier frequency
          * @param modFreqRatioToUse
          * @param peakDeviationToUse
          * @param feedbackToUse
@@ -60,11 +58,13 @@ public:
                    double peakDeviationToUse,
                    double feedbackToUse = 0.0,
                    FMOsc::FMMode modeToUse = LINEAR,
+                   OADEnv::Parameters *envParamsToUse = nullptr,
                    std::vector<FMOsc::Parameters> submodulatorParams = {}) :
                 mode(modeToUse),
                 modFreqRatio(modFreqRatioToUse),
                 peakDeviation(peakDeviationToUse),
                 feedback(feedbackToUse),
+                envelope(envParamsToUse),
                 modulatorParams(std::move(submodulatorParams)) {}
 
         /**
@@ -81,12 +81,14 @@ public:
                    double peakDeviationToUse,
                    double feedbackToUse = 0.0,
                    FMOsc::FMMode modeToUse = LINEAR,
+                   OADEnv::Parameters *envParamsToUse = nullptr,
                    std::vector<FMOsc::Parameters> submodulatorParams = {}) :
                 mode(modeToUse),
                 modMode(modModeToUse),
                 modFreq(modFreqToUse),
                 peakDeviation(peakDeviationToUse),
                 feedback(feedbackToUse),
+                envelope(envParamsToUse),
                 modulatorParams(std::move(submodulatorParams)) {}
 
         /**
@@ -99,6 +101,11 @@ public:
             osc.modulationFrequency = modFreq;
             osc.modulationFrequencyRatio = modFreqRatio;
             osc.peakDeviation = peakDeviation;
+            osc.feedback = feedback;
+            if (envelope) {
+                osc.setEnvelope(*envelope);
+                osc.envelopeSet = true;
+            }
             for (auto p: modulatorParams) {
                 osc.addModulator(p.generateOscillator());
             }
@@ -111,6 +118,7 @@ public:
         double modFreq{100.};
         double peakDeviation{1.0};
         double feedback{0.0};
+        OADEnv::Parameters *envelope;
         std::vector<FMOsc::Parameters> modulatorParams;
     };
 
@@ -157,5 +165,9 @@ private:
 
     double peakDeviation{0.0};
 
+    double feedback{0.0};
+    double prevSample{0.0};
+
     OADEnv envelope;
+    bool envelopeSet{false};
 };

@@ -14,12 +14,15 @@ PercussionFMAudioProcessorEditor::PercussionFMAudioProcessorEditor(PercussionFMA
         : AudioProcessorEditor(&p),
           audioProcessor(p),
           scopeComponent(audioProcessor.getAudioBufferQueue(), audioProcessor.apvts),
-          scopeOnOffComponent(audioProcessor.apvts, "SCOPE") {
+          scopeOnOffComponent(audioProcessor.apvts, "SCOPE"),
+          patchSelectorComponent(audioProcessor.apvts, "PATCH") {
     setSize(800, 600);
 
     addAndMakeVisible(scopeComponent);
 
     addAndMakeVisible(scopeOnOffComponent);
+
+    addAndMakeVisible(patchSelectorComponent);
 }
 
 PercussionFMAudioProcessorEditor::~PercussionFMAudioProcessorEditor() {
@@ -32,9 +35,12 @@ void PercussionFMAudioProcessorEditor::paint(juce::Graphics &g) {
 
 void PercussionFMAudioProcessorEditor::resized() {
     auto area = getLocalBounds();
+    auto scopeY = 80;
 
-    scopeComponent.setTopLeftPosition(0, 80);
+    scopeComponent.setTopLeftPosition(0, scopeY);
     scopeComponent.setSize(area.getWidth(), area.getHeight() - 100);
 
-    scopeOnOffComponent.setBounds(0, 0, getWidth() / 5, 80);
+    scopeOnOffComponent.setBounds(0, 0, getWidth() / 5, scopeY);
+
+    patchSelectorComponent.setBounds(scopeOnOffComponent.getRight(), 0, 3 * getWidth() / 10, scopeY);
 }

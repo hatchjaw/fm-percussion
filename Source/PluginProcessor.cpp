@@ -12,6 +12,7 @@
 #include "Oscillators/FMOsc.h"
 #include "defines.h"
 #include "Voices/FMVoice.h"
+#include "Patches.h"
 
 //==============================================================================
 PercussionFMAudioProcessor::PercussionFMAudioProcessor()
@@ -28,64 +29,12 @@ PercussionFMAudioProcessor::PercussionFMAudioProcessor()
 {
     fmSynth.addSound(new FMBellSound());
 
-    // Fancy bell
-    auto fbParams = new FMVoice::Parameters(
-            FMOsc::LINEAR,
-            {
-                    FMOsc::Parameters(1.4, 500., 0.0, FMOsc::EXPONENTIAL, {
-                            FMOsc::Parameters(1.4, 1.9)
-                    }),
-                    FMOsc::Parameters(1.35, .5)
-            },
-            *new OADEnv::Parameters(0.f, 0.f, 5.f)
-    );
-
-    auto anotherBell = new FMVoice::Parameters(
-            FMOsc::EXPONENTIAL,
-            {FMOsc::Parameters(FMOsc::ModulationMode::FIXED, 550., .5)},
-            *new OADEnv::Parameters(0.f, 0.f, 5.f)
-    );
-
-    // Chowning bell
-    auto cbParams = new FMVoice::Parameters(
-            FMOsc::LINEAR,
-            {FMOsc::Parameters(1.4, 1000.)},
-            *new OADEnv::Parameters(0.0f, 0.0f, 7.5f)
-    );
-
-    // Chowning drum
-    auto cdParams = new FMVoice::Parameters(
-            FMOsc::LINEAR,
-            {FMOsc::Parameters(1.4, 1000.)},
-            *new OADEnv::Parameters(0.8f, 0.05f, .15f)
-    );
-
-    auto params = fbParams;
-
     for (int i = 0; i < NUM_VOICES; ++i) {
-        auto carrier = new FMOsc(params->carrierMode);
-
-        //==================================================================
-//        auto modulator = new FMOsc(FMOsc::EXPONENTIAL);
-//        modulator->addModulator(FMOsc(FMOsc::EXPONENTIAL), 1.4, 1.9);
-//
-//        carrier->addModulator(*modulator, 1.4, 500.);
-//        carrier->addModulator(FMOsc(FMOsc::EXPONENTIAL), 1.35, .5);
-        //==================================================================
-        for (auto s: params->modulatorSettings) {
-            auto m = s.generateOscillator();
-            carrier->addModulator(m);
-        }
-        //==================================================================
-
-
-        carrier->setEnvelope(params->envParams);
-
+        auto osc = Patches::getOscillator(static_cast<Patches::Patch>(currentPatch));
         auto voice = new FMVoice();
-        voice->setCarrier(carrier);
+        voice->setCarrier(osc);
 
         fmSynth.addVoice(voice);
-//        fmSynth.addVoice(new FMBellVoice(new FMOsc()));
     }
 }
 
@@ -202,6 +151,22 @@ void PercussionFMAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, 
         buffer.clear(i, 0, buffer.getNumSamples());
 
     auto scopeOn = *apvts.getRawParameterValue("SCOPE") > .5f;
+    auto patchNum = (int) apvts.getRawParameterValue("PATCH")->load();
+    auto patchName = dynamic_cast<juce::AudioParameterChoice *>(apvts.getParameter("PATCH"))->getCurrentChoiceName();
+
+    if (patchNum != currentPatch) {
+        fmSynth.clearVoices();
+        currentPatch = patchNum;
+
+        for (int i = 0; i < NUM_VOICES; ++i) {
+            auto osc = Patches::getOscillator(static_cast<Patches::Patch>(patchNum));
+            auto voice = new FMVoice();
+            voice->setCarrier(osc);
+            voice->prepareToPlay(getSampleRate(), getBlockSize(), getTotalNumOutputChannels());
+
+            fmSynth.addVoice(voice);
+        }
+    }
 
     fmSynth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
 
@@ -244,6 +209,16 @@ juce::AudioProcessorValueTreeState::ParameterLayout PercussionFMAudioProcessor::
 
     // Scope on/off
     params.push_back(std::make_unique<juce::AudioParameterBool>("SCOPE", "Scope on", true));
+
+    // Patch selector
+    params.push_back(std::make_unique<juce::AudioParameterChoice>("PATCH", "Patch", juce::StringArray{
+            "Bell 1 (Chowning)",
+            "Bell 2 (fixed modulator)",
+            "Bell 3 (MMFM)",
+            "Drum 1 (Chowning)",
+            "Drum 2 (Chowning)",
+            "Chime 1"
+    }, 0));
 
     return {params.begin(), params.end()};
 }

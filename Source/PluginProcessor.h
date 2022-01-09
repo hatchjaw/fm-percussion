@@ -75,6 +75,7 @@ private:
     juce::Synthesiser fmSynth;
     AudioBufferQueue<float> audioBufferQueue;
     ScopeDataCollector<float> scopeDataCollector { audioBufferQueue };
+    int currentPatch{0};
 
     static juce::AudioProcessorValueTreeState::ParameterLayout createParams();
     //==============================================================================

@@ -111,7 +111,7 @@ private:
     size_t numCollected;
     SampleType prevSample = SampleType(100);
 
-    static constexpr auto triggerLevel = SampleType(0.01);
+    static constexpr auto triggerLevel = SampleType(0.001);
 
     enum class State {
         waitingForTrigger, collecting
