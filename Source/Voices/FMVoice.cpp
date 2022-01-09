@@ -32,7 +32,6 @@ void FMVoice::startNote(
         int currentPitchWheelPosition
 ) {
     this->carrier->setupNote(getSampleRate(), juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber), velocity);
-    this->envelope.noteOn();
 }
 
 void FMVoice::stopNote(float velocity, bool allowTailOff) {
@@ -54,7 +53,6 @@ void FMVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int numOutpu
     spec.numChannels = numOutputChannels;
 
     this->carrier->prepareToPlay(spec);
-    this->envelope.setParameters(0.0f, 0.01f, 5.f);
 
     this->isPrepared = true;
 }
@@ -73,8 +71,6 @@ void FMVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int startS
     juce::dsp::AudioBlock<float> audioBlock{this->buffer};
 
     this->carrier->computeNextBlock(this->buffer, 0, this->buffer.getNumSamples());
-    // Maybe just use the oscillator's envelope?...
-//    this->envelope.applyEnvelopeToBuffer(this->buffer, 0, this->buffer.getNumSamples());
 
     for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel) {
         outputBuffer.addFrom(channel, startSample, this->buffer, channel, 0, numSamples);

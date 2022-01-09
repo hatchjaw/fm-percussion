@@ -10,4 +10,4 @@
 
 #pragma once
 
-#define NUM_VOICES 5
+#define NUM_VOICES 16

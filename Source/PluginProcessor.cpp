@@ -9,7 +9,6 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include "Voices/FMBellSound.h"
-#include "Voices/FMBellVoice.h"
 #include "Oscillators/FMOsc.h"
 #include "defines.h"
 #include "Voices/FMVoice.h"
@@ -29,13 +28,62 @@ PercussionFMAudioProcessor::PercussionFMAudioProcessor()
 {
     fmSynth.addSound(new FMBellSound());
 
+    // Fancy bell
+    auto fbParams = new FMVoice::Parameters(
+            FMOsc::LINEAR,
+            {
+                    FMOsc::Parameters(1.4, 500., 0.0, FMOsc::EXPONENTIAL, {
+                            FMOsc::Parameters(1.4, 1.9)
+                    }),
+                    FMOsc::Parameters(1.35, .5)
+            },
+            *new OADEnv::Parameters(0.f, 0.f, 5.f)
+    );
+
+    auto anotherBell = new FMVoice::Parameters(
+            FMOsc::EXPONENTIAL,
+            {FMOsc::Parameters(FMOsc::ModulationMode::FIXED, 550., .5)},
+            *new OADEnv::Parameters(0.f, 0.f, 5.f)
+    );
+
+    // Chowning bell
+    auto cbParams = new FMVoice::Parameters(
+            FMOsc::LINEAR,
+            {FMOsc::Parameters(1.4, 1000.)},
+            *new OADEnv::Parameters(0.0f, 0.0f, 7.5f)
+    );
+
+    // Chowning drum
+    auto cdParams = new FMVoice::Parameters(
+            FMOsc::LINEAR,
+            {FMOsc::Parameters(1.4, 1000.)},
+            *new OADEnv::Parameters(0.8f, 0.05f, .15f)
+    );
+
+    auto params = fbParams;
+
     for (int i = 0; i < NUM_VOICES; ++i) {
-        auto carrier = new FMOsc();
-        carrier->addModulator(new FMOsc());
-//        carrier->addModulator(new FMOsc());
+        auto carrier = new FMOsc(params->carrierMode);
+
+        //==================================================================
+//        auto modulator = new FMOsc(FMOsc::EXPONENTIAL);
+//        modulator->addModulator(FMOsc(FMOsc::EXPONENTIAL), 1.4, 1.9);
+//
+//        carrier->addModulator(*modulator, 1.4, 500.);
+//        carrier->addModulator(FMOsc(FMOsc::EXPONENTIAL), 1.35, .5);
+        //==================================================================
+        for (auto s: params->modulatorSettings) {
+            auto m = s.generateOscillator();
+            carrier->addModulator(m);
+        }
+        //==================================================================
+
+
+        carrier->setEnvelope(params->envParams);
 
         auto voice = new FMVoice();
         voice->setCarrier(carrier);
+
         fmSynth.addVoice(voice);
 //        fmSynth.addVoice(new FMBellVoice(new FMOsc()));
     }

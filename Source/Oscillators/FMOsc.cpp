@@ -10,16 +10,17 @@
 
 #include "FMOsc.h"
 
-void FMOsc::addModulator(FMOsc *modulatorToAdd) {
-    modulators.add(modulatorToAdd);
+FMOsc::FMOsc(FMOsc::FMMode modeToSet) : mode(modeToSet) {}
+
+void FMOsc::addModulator(FMOsc modulatorToAdd) {
+    modulators.push_back(modulatorToAdd);
 }
 
 void FMOsc::prepareToPlay(juce::dsp::ProcessSpec &spec) {
     this->sampleRate = spec.sampleRate;
-    this->envelope.setParameters(0.0f, .01f, 5.f);
 
-    for (auto *modulator: modulators) {
-        modulator->prepareToPlay(spec);
+    for (auto &modulator: modulators) {
+        modulator.prepareToPlay(spec);
     }
 }
 
@@ -28,11 +29,12 @@ float FMOsc::computeNextSample() {
     auto modulation = 0.f;
 
     // Calculate modulation amount.
+    // For 0 modulators this is an unmodulated oscillator.
     // For 1 modulator this will either be basic FM or, if the modulator has modulators of its own, series MMFM.
     // For >1 modulators this will be parallel MMFM.
     // TODO: feedback FM
-    for (auto *modulator: modulators) {
-        modulation += modulator->computeNextSample();
+    for (auto &modulator: modulators) {
+        modulation += modulator.computeNextSample();
     }
 
     switch (mode) {
@@ -67,9 +69,9 @@ void FMOsc::computeNextBlock(juce::AudioBuffer<float> &buffer, int startSample, 
 
 void FMOsc::reset() {
     this->currentAngle = 0.0;
-//    this->envelope.reset();
-    for (auto *modulator: modulators) {
-        modulator->reset();
+
+    for (auto &modulator: modulators) {
+        modulator.reset();
     }
 }
 
@@ -82,21 +84,30 @@ void FMOsc::setupNote(double sampleRate, double frequency, float noteAmplitude) 
 
     this->envelope.noteOn();
 
-    this->setupModulators(sampleRate, 550, .001 * noteAmplitude * 550, 5.f);
+//    this->setupModulators(sampleRate, 550, .001 * noteAmplitude * 550);
 
-//    if (this->modulator) {
-//        this->modulator->adsr.noteOn();
-//    }
+    for (auto &m: modulators) {
+        auto modFreq = m.modMode == PROPORTIONAL ? frequency * m.modulationFrequencyRatio : m.modulationFrequency;
+        // modulation index, I = d/m; d, peak deviation; m, modulation frequency;
+        auto modulationIndex = noteAmplitude * (m.peakDeviation / modFreq);
+        m.setupNote(sampleRate, modFreq, static_cast<float>(modulationIndex));
+    }
 }
 
-void FMOsc::setupModulators(double sampleRate, double frequency, double peakDeviation, float decay) {
-    for (auto *modulator: modulators) {
-        modulator->setupNote(sampleRate, frequency, peakDeviation / frequency);
-        modulator->envelope.setParameters(0.0f, 0.0f, decay);
-        modulator->envelope.noteOn();
+void FMOsc::setupModulators(double sampleRate, double frequency, double peakDeviationToUse) {
+    for (auto &modulator: modulators) {
+        modulator.setupNote(sampleRate, frequency, static_cast<float>(peakDeviationToUse / frequency));
     }
 }
 
 bool FMOsc::isActive() {
     return this->envelope.isActive();
 }
+
+void FMOsc::setEnvelope(OADEnv::Parameters &newParams) {
+    this->envelope.setParameters(newParams);
+    for (auto &modulator: modulators) {
+        modulator.setEnvelope(newParams);
+    }
+}
+

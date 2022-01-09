@@ -55,7 +55,7 @@ void OADEnv::applyEnvelopeToBuffer(juce::AudioBuffer<float> &buffer, int startSa
 
 void OADEnv::noteOn() noexcept {
     if (attackRate > 0.0f) {
-        envelopeVal = onsetLevel;
+        envelopeVal = parameters.onset;
         state = State::attack;
     } else if (decayRate > 0.0f) {
         envelopeVal = 1.0f;
@@ -68,8 +68,8 @@ void OADEnv::recalculateRates() noexcept {
         return timeInSeconds > 0.0f ? (float) (distance / (timeInSeconds * sr)) : -1.0f;
     };
 
-    attackRate = getRate(1.0f, attackTime, sampleRate);
-    decayRate = getRate(1.0f, decayTime, sampleRate);
+    attackRate = getRate(1.0f, parameters.attack, sampleRate);
+    decayRate = getRate(1.0f, parameters.decay, sampleRate);
 
     if ((state == State::attack && attackRate <= 0.0f)
         || (state == State::decay && (decayRate <= 0.0f || envelopeVal <= 0.0f))) {
@@ -77,11 +77,8 @@ void OADEnv::recalculateRates() noexcept {
     }
 }
 
-void OADEnv::setParameters(const float newOnset, const float newAttack, const float newDecay) {
-    // need to call setSampleRate() first!
+void OADEnv::setParameters(const Parameters &newParameters) {
     jassert (sampleRate > 0.0);
-    onsetLevel = newOnset;
-    attackTime = newAttack;
-    decayTime = newDecay;
+    parameters = newParameters;
     recalculateRates();
 }

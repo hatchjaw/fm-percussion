@@ -11,14 +11,32 @@
 #pragma once
 
 #include <JuceHeader.h>
+
+#include <utility>
 #include "../Oscillators/FMOsc.h"
 #include "../Envelopes/OADEnv.h"
 
 class FMVoice : public juce::SynthesiserVoice {
 public:
+    struct Parameters {
+        Parameters() = default;
+
+        Parameters(FMOsc::FMMode carrierModeToUse,
+                   std::vector<FMOsc::Parameters> modulatorSettingsToUse,
+                   OADEnv::Parameters &envParamsToUse)
+                : carrierMode(carrierModeToUse),
+                  modulatorSettings(std::move(modulatorSettingsToUse)),
+                  envParams(envParamsToUse) {
+        }
+
+        FMOsc::FMMode carrierMode;
+        std::vector<FMOsc::Parameters> modulatorSettings;
+        OADEnv::Parameters envParams;
+    };
+
     ~FMVoice() override;
 
-    void setCarrier(FMOsc* newCarrier);
+    void setCarrier(FMOsc *newCarrier);
 
     bool canPlaySound(juce::SynthesiserSound *sound) override;
 
@@ -40,8 +58,7 @@ public:
                          int numSamples) override;
 
 protected:
-    FMOsc* carrier;
-    OADEnv envelope;
+    FMOsc *carrier;
 
     bool isPrepared{false};
 

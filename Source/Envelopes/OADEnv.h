@@ -13,11 +13,26 @@
 #include <JuceHeader.h>
 
 /**
- * Onset Attack Decay envelope...
+ * Onset-Attack-Decay envelope
+ * TODO: support exponential curves
  */
 class OADEnv {
 public:
-    void setParameters(const float newOnset, const float newAttack, const float newDecay);
+    struct Parameters {
+        Parameters() = default;
+
+        Parameters(float onsetAmplitude,
+                   float attackTimeSeconds,
+                   float decayTimeSeconds)
+                : onset(onsetAmplitude),
+                  attack(attackTimeSeconds),
+                  decay(decayTimeSeconds) {
+        }
+
+        float onset = 0.0f, attack = 0.1f, decay = 0.1f;
+    };
+
+    void setParameters(const Parameters &);
 
     /** Starts the attack phase of the envelope. */
     void noteOn() noexcept;
@@ -59,9 +74,8 @@ private:
 
     double sampleRate{44100.0};
     float envelopeVal{0.0f};
-    float onsetLevel{0.0f};
-    float attackTime{0.1f};
-    float decayTime{1.0f};
+
+    Parameters parameters;
 
     float attackRate{0.0f};
     float decayRate{0.0f};
