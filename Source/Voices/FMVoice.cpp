@@ -9,7 +9,7 @@
 */
 
 #include "FMVoice.h"
-#include "FMBellSound.h"
+#include "FMSound.h"
 
 FMVoice::~FMVoice() {
     // I'm certain there's a better way than this... I think carrier should be
@@ -18,7 +18,7 @@ FMVoice::~FMVoice() {
 }
 
 bool FMVoice::canPlaySound(juce::SynthesiserSound *sound) {
-    return dynamic_cast<FMBellSound *>(sound) != nullptr;
+    return dynamic_cast<FMSound *>(sound) != nullptr;
 }
 
 void FMVoice::setCarrier(FMOsc *newCarrier) {
@@ -80,4 +80,8 @@ void FMVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int startS
             this->carrier->reset();
         }
     }
+}
+
+void FMVoice::updateModulationAmount(float newModAmount) {
+    this->carrier->setModulationAmount(newModAmount);
 }

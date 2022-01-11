@@ -22,10 +22,14 @@ public:
         BELL3,
         DRUM1,
         DRUM2,
+        DRUM3,
         CHIME1,
+        MARIMBA,
+        SHEET_METAL,
+        TIMPANI
     };
 
-    static FMOsc *getOscillator(Patch patch) {
+    static FMOsc *generateOscillator(Patch patch) {
         auto params = getPatch(patch);
         auto carrier = new FMOsc(params->carrierMode);
 
@@ -81,28 +85,82 @@ private:
                                         80.f / 55.f,
                                         1000.,
                                         0.05,
-                                        FMOsc::EXPONENTIAL,
+                                        FMOsc::LINEAR,
                                         new OADEnv::Parameters(0.0f, 0.0f, .025f)
                                 )
                         },
                         new OADEnv::Parameters(0.8f, 0.05f, .15f)
                 );
-            case CHIME1:
+            case DRUM3:
                 return new FMVoice::Parameters(
                         FMOsc::LINEAR,
                         {
                                 FMOsc::Parameters(
-                                        2.05,
-                                        1000.,
+                                        .6875,
+                                        2500.,
                                         0.0,
-                                        FMOsc::EXPONENTIAL,
+                                        FMOsc::LINEAR,
+                                        new OADEnv::Parameters(0.0f, 0.0f, .016f)
+                                )
+                        },
+                        new OADEnv::Parameters(.8f, .02f, .18f)
+                );
+            case CHIME1:
+                return new FMVoice::Parameters(
+                        FMOsc::EXPONENTIAL,
+                        {
+                                FMOsc::Parameters(
+                                        2.05,
+                                        5.,
+                                        0.0,
+                                        FMOsc::LINEAR,
                                         new OADEnv::Parameters(0.0f, 0.0f, .75f)
                                 )
                         },
                         new OADEnv::Parameters(0.0f, 0.0f, 1.f)
                 );
+            case MARIMBA:
+                return new FMVoice::Parameters(
+                        FMOsc::LINEAR,
+                        {FMOsc::Parameters(2.4, 500., 0.0, FMOsc::LINEAR,
+                                           new OADEnv::Parameters(0.0f, 0.0f, .15f))},
+                        new OADEnv::Parameters(.8f, .02f, .18f)
+                );
+            case SHEET_METAL: {
+                auto duration = 1.f;
+                return new FMVoice::Parameters(
+                        FMOsc::LINEAR,
+                        {FMOsc::Parameters(2.2, 4000., .05, FMOsc::LINEAR,
+                                           new OADEnv::Parameters(0.0f, .12f * duration, .88f * duration))},
+                        new OADEnv::Parameters(0.8f, .2f * duration, .8f * duration)
+                );
+            }
+            case TIMPANI: {
+                auto duration = 1.f;
+                return new FMVoice::Parameters(
+                        FMOsc::EXPONENTIAL,
+                        {
+                                FMOsc::Parameters(
+                                        1.3,
+                                        5.,
+                                        .25,
+                                        FMOsc::LINEAR,
+                                        new OADEnv::Parameters(0.0f, 0.0f, .1f * duration)
+                                ),
+                                FMOsc::Parameters(
+                                        1.6,
+                                        9.,
+                                        .25,
+                                        FMOsc::LINEAR,
+                                        new OADEnv::Parameters(0.0f, 0.0f, .8f * duration)
+                                ),
+                        },
+                        new OADEnv::Parameters(0.8f, .125f * duration, .875f * duration)
+                );
+            }
             default:
                 jassertfalse;
+                break;
         }
 
         jassertfalse;

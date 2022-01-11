@@ -15,7 +15,8 @@ PercussionFMAudioProcessorEditor::PercussionFMAudioProcessorEditor(PercussionFMA
           audioProcessor(p),
           scopeComponent(audioProcessor.getAudioBufferQueue(), audioProcessor.apvts),
           scopeOnOffComponent(audioProcessor.apvts, "SCOPE"),
-          patchSelectorComponent(audioProcessor.apvts, "PATCH") {
+          patchSelectorComponent(audioProcessor.apvts, "PATCH"),
+          modulationAmountComponent(audioProcessor.apvts, "MOD_SCALE"){
     setSize(800, 600);
 
     addAndMakeVisible(scopeComponent);
@@ -23,6 +24,8 @@ PercussionFMAudioProcessorEditor::PercussionFMAudioProcessorEditor(PercussionFMA
     addAndMakeVisible(scopeOnOffComponent);
 
     addAndMakeVisible(patchSelectorComponent);
+
+    addAndMakeVisible(modulationAmountComponent);
 }
 
 PercussionFMAudioProcessorEditor::~PercussionFMAudioProcessorEditor() {
@@ -43,4 +46,6 @@ void PercussionFMAudioProcessorEditor::resized() {
     scopeOnOffComponent.setBounds(0, 0, getWidth() / 5, scopeY);
 
     patchSelectorComponent.setBounds(scopeOnOffComponent.getRight(), 0, 3 * getWidth() / 10, scopeY);
+
+    modulationAmountComponent.setBounds(patchSelectorComponent.getRight(), 0, getWidth() / 2, scopeY);
 }

@@ -8,11 +8,10 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include "Voices/FMBellSound.h"
-#include "Oscillators/FMOsc.h"
-#include "defines.h"
+#include "Voices/FMSound.h"
 #include "Voices/FMVoice.h"
 #include "Patches.h"
+#include "defines.h"
 
 //==============================================================================
 PercussionFMAudioProcessor::PercussionFMAudioProcessor()
@@ -27,10 +26,10 @@ PercussionFMAudioProcessor::PercussionFMAudioProcessor()
 ), apvts(*this, nullptr, "Parameters", createParams())
 #endif
 {
-    fmSynth.addSound(new FMBellSound());
+    fmSynth.addSound(new FMSound());
 
     for (int i = 0; i < NUM_VOICES; ++i) {
-        auto osc = Patches::getOscillator(static_cast<Patches::Patch>(currentPatch));
+        auto osc = Patches::generateOscillator(static_cast<Patches::Patch>(currentPatch));
         auto voice = new FMVoice();
         voice->setCarrier(osc);
 
@@ -150,16 +149,19 @@ void PercussionFMAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, 
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear(i, 0, buffer.getNumSamples());
 
-    auto scopeOn = *apvts.getRawParameterValue("SCOPE") > .5f;
+    // Read parameter values from the value tree state.
+    auto scopeOn = apvts.getRawParameterValue("SCOPE")->load() > .5f;
     auto patchNum = (int) apvts.getRawParameterValue("PATCH")->load();
-    auto patchName = dynamic_cast<juce::AudioParameterChoice *>(apvts.getParameter("PATCH"))->getCurrentChoiceName();
+    // Modulation amount appears to the user as a percentage; divide by 100 so it can be used as a scaling value.
+    auto modAmount = apvts.getRawParameterValue("MOD_SCALE")->load() / 100.f;
 
+    // Check whether the patch number has changed; if so, load the new patch.
     if (patchNum != currentPatch) {
         fmSynth.clearVoices();
         currentPatch = patchNum;
 
         for (int i = 0; i < NUM_VOICES; ++i) {
-            auto osc = Patches::getOscillator(static_cast<Patches::Patch>(patchNum));
+            auto osc = Patches::generateOscillator(static_cast<Patches::Patch>(patchNum));
             auto voice = new FMVoice();
             voice->setCarrier(osc);
             voice->prepareToPlay(getSampleRate(), getBlockSize(), getTotalNumOutputChannels());
@@ -168,8 +170,17 @@ void PercussionFMAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, 
         }
     }
 
+    // Update the modulation amount; this recursively scales the peak deviation and feedback for all modulators.
+    for (int i = 0; i < fmSynth.getNumVoices(); ++i) {
+        if (auto voice = dynamic_cast<FMVoice *>(fmSynth.getVoice(i))) {
+            voice->updateModulationAmount(modAmount);
+        }
+    }
+
+    // Render the next block of output.
     fmSynth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
 
+    // If enabled, gather data to be displayed in the scope.
     if (scopeOn) {
         scopeDataCollector.process(buffer.getReadPointer(0), (size_t) buffer.getNumSamples());
     }
@@ -217,8 +228,19 @@ juce::AudioProcessorValueTreeState::ParameterLayout PercussionFMAudioProcessor::
             "Bell 3 (MMFM)",
             "Drum 1 (Chowning)",
             "Drum 2 (Chowning)",
-            "Chime 1"
+            "Drum 3",
+            "Chime 1",
+            "Marimba",
+            "Sheet Metal",
+            "Timpani"
     }, 0));
+
+    // Scalar for modulation index and feedback.
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+            "MOD_SCALE",
+            "Mod amount",
+            juce::NormalisableRange<float>(0.0f, 200.0f, 1.f),
+            100.f));
 
     return {params.begin(), params.end()};
 }

@@ -146,6 +146,8 @@ public:
      */
     void setEnvelope(OADEnv::Parameters &);
 
+    void setModulationAmount(float newModulationAmount);
+
 private:
     std::vector<FMOsc> modulators;
 
@@ -170,4 +172,7 @@ private:
 
     OADEnv envelope;
     bool envelopeSet{false};
+
+    // A scaling factor applied to peak deviation and feedback.
+    double modulationAmount{1.0};
 };

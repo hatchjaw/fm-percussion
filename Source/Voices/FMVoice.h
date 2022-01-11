@@ -57,6 +57,8 @@ public:
                          int startSample,
                          int numSamples) override;
 
+    void updateModulationAmount(float newModAmount);
+
 protected:
     FMOsc *carrier;
 

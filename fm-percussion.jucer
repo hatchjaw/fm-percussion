@@ -17,11 +17,15 @@
         <FILE id="k1a9zZ" name="FMOsc.h" compile="0" resource="0" file="Source/Oscillators/FMOsc.h"/>
       </GROUP>
       <GROUP id="{D0B8B32E-D7FD-E06A-B7E3-7C8D9ABDDBAE}" name="Voices">
-        <FILE id="Xtu5Ky" name="FMBellSound.h" compile="0" resource="0" file="Source/Voices/FMBellSound.h"/>
+        <FILE id="Xtu5Ky" name="FMSound.h" compile="0" resource="0" file="Source/Voices/FMSound.h"/>
         <FILE id="aFo8Jj" name="FMVoice.cpp" compile="1" resource="0" file="Source/Voices/FMVoice.cpp"/>
         <FILE id="BZV0de" name="FMVoice.h" compile="0" resource="0" file="Source/Voices/FMVoice.h"/>
       </GROUP>
       <GROUP id="{6809EF8C-8E70-E3C8-177A-2212C3534935}" name="UI">
+        <FILE id="fPykuB" name="ModulationAmountComponent.cpp" compile="1"
+              resource="0" file="Source/UI/ModulationAmountComponent.cpp"/>
+        <FILE id="pH3s4v" name="ModulationAmountComponent.h" compile="0" resource="0"
+              file="Source/UI/ModulationAmountComponent.h"/>
         <FILE id="OwSwm7" name="PatchSelectorComponent.cpp" compile="1" resource="0"
               file="Source/UI/PatchSelectorComponent.cpp"/>
         <FILE id="TK9esj" name="PatchSelectorComponent.h" compile="0" resource="0"

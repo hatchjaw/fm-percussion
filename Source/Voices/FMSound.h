@@ -1,7 +1,7 @@
 /*
   ==============================================================================
 
-    FMBellSound.h
+    FMSound.h
     Created: 1 Jan 2022 8:46:15pm
     Author:  Tommy Rushton
 
@@ -12,7 +12,7 @@
 
 #include <JuceHeader.h>
 
-class FMBellSound : public juce::SynthesiserSound {
+class FMSound : public juce::SynthesiserSound {
 public:
     bool appliesToNote(int midiNoteNumber) override { return true; }
 

@@ -38,11 +38,13 @@ float FMOsc::computeNextSample() {
 
     switch (mode) {
         case LINEAR:
-            sample = (float) (this->amplitude * std::sin(this->currentAngle + modulation + (feedback * prevSample)));
+            sample = (float) (this->amplitude *
+                              std::sin(this->currentAngle + modulation + (feedback * modulationAmount * prevSample)));
             break;
         case EXPONENTIAL:
             sample = (float) (this->amplitude *
-                              std::sin(this->currentAngle * pow(2, modulation) + (feedback * prevSample)));
+                              std::sin(this->currentAngle * pow(2, modulation) +
+                                       (feedback * modulationAmount * prevSample)));
             break;
         default:
             jassertfalse;
@@ -84,19 +86,11 @@ void FMOsc::setupNote(double sampleRate, double frequency, float noteAmplitude) 
 
     this->envelope.noteOn();
 
-//    this->setupModulators(sampleRate, 550, .001 * noteAmplitude * 550);
-
     for (auto &m: modulators) {
         auto modFreq = m.modMode == PROPORTIONAL ? frequency * m.modulationFrequencyRatio : m.modulationFrequency;
         // modulation index, I = d/m; d, peak deviation; m, modulation frequency;
-        auto modulationIndex = noteAmplitude * (m.peakDeviation / modFreq);
+        auto modulationIndex = noteAmplitude * modulationAmount * (m.peakDeviation / modFreq);
         m.setupNote(sampleRate, modFreq, static_cast<float>(modulationIndex));
-    }
-}
-
-void FMOsc::setupModulators(double sampleRate, double frequency, double peakDeviationToUse) {
-    for (auto &modulator: modulators) {
-        modulator.setupNote(sampleRate, frequency, static_cast<float>(peakDeviationToUse / frequency));
     }
 }
 
@@ -110,6 +104,13 @@ void FMOsc::setEnvelope(OADEnv::Parameters &newParams) {
         if (!modulator.envelopeSet) {
             modulator.setEnvelope(newParams);
         }
+    }
+}
+
+void FMOsc::setModulationAmount(float newModulationAmount) {
+    this->modulationAmount = newModulationAmount;
+    for (auto &m: modulators) {
+        m.setModulationAmount(newModulationAmount);
     }
 }
 
