@@ -58,10 +58,7 @@ public:
 
         This must be called before the getNextSample() or setParameters() methods.
     */
-    void setSampleRate(double newSampleRate) noexcept {
-        jassert (newSampleRate > 0.0);
-        sampleRate = newSampleRate;
-    }
+    void setSampleRate(double newSampleRate) noexcept;
 
 private:
     void recalculateRates() noexcept;

@@ -82,3 +82,9 @@ void OADEnv::setParameters(const Parameters &newParameters) {
     parameters = newParameters;
     recalculateRates();
 }
+
+void OADEnv::setSampleRate(double newSampleRate) noexcept {
+    jassert (newSampleRate > 0.0);
+    sampleRate = newSampleRate;
+    recalculateRates();
+}

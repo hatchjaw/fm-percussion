@@ -18,6 +18,7 @@ void FMOsc::addModulator(FMOsc modulatorToAdd) {
 
 void FMOsc::prepareToPlay(juce::dsp::ProcessSpec &spec) {
     this->sampleRate = spec.sampleRate;
+    this->envelope.setSampleRate(spec.sampleRate);
 
     for (auto &modulator: modulators) {
         modulator.prepareToPlay(spec);
@@ -101,7 +102,7 @@ bool FMOsc::isActive() {
 void FMOsc::setEnvelope(OADEnv::Parameters &newParams) {
     this->envelope.setParameters(newParams);
     for (auto &modulator: modulators) {
-        if (!modulator.envelopeSet) {
+        if (!modulator.envelopeIsSet) {
             modulator.setEnvelope(newParams);
         }
     }

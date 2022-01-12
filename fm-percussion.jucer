@@ -6,6 +6,11 @@
               pluginManufacturer="TAR" pluginManufacturerCode="TarQ" pluginCode="Tr11">
   <MAINGROUP id="JA1Nms" name="PercussionFM">
     <GROUP id="{E49D9007-AA7A-F25D-26D6-3942488EE46B}" name="Source">
+      <GROUP id="{4764C0A9-A2DB-8F68-428D-29AD77479106}" name="Filters">
+        <FILE id="eqOKg5" name="LowPassFilter.cpp" compile="1" resource="0"
+              file="Source/Filters/LowPassFilter.cpp"/>
+        <FILE id="TqrqA6" name="LowPassFilter.h" compile="0" resource="0" file="Source/Filters/LowPassFilter.h"/>
+      </GROUP>
       <FILE id="zJwqxz" name="Patches.h" compile="0" resource="0" file="Source/Patches.h"/>
       <GROUP id="{96D24103-F694-1E0A-5737-D9E72908903B}" name="Envelopes">
         <FILE id="nAcrum" name="OADEnv.cpp" compile="1" resource="0" file="Source/Envelopes/OADEnv.cpp"/>

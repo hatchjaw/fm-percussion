@@ -11,6 +11,7 @@
 #include <JuceHeader.h>
 
 #include "UI/ScopeComponent.h"
+#include "Filters/LowPassFilter.h"
 
 //==============================================================================
 /**
@@ -75,8 +76,9 @@ private:
     juce::Synthesiser fmSynth;
     AudioBufferQueue<float> audioBufferQueue;
     ScopeDataCollector<float> scopeDataCollector { audioBufferQueue };
+    std::vector<LowPassFilter> filter;
     int currentPatch{0};
-
+    const int oversamplingFactor{2};
     static juce::AudioProcessorValueTreeState::ParameterLayout createParams();
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PercussionFMAudioProcessor)

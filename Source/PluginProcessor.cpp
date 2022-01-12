@@ -35,6 +35,12 @@ PercussionFMAudioProcessor::PercussionFMAudioProcessor()
 
         fmSynth.addVoice(voice);
     }
+
+    // Add a lowpass filter per channel.
+    for (int channel = 0; channel < getTotalNumOutputChannels(); ++channel) {
+        auto lpf = new LowPassFilter;
+        filter.push_back(*lpf);
+    }
 }
 
 PercussionFMAudioProcessor::~PercussionFMAudioProcessor() {
@@ -94,11 +100,11 @@ void PercussionFMAudioProcessor::changeProgramName(int index, const juce::String
 
 //==============================================================================
 void PercussionFMAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock) {
-    fmSynth.setCurrentPlaybackSampleRate(sampleRate);
+    fmSynth.setCurrentPlaybackSampleRate(sampleRate * oversamplingFactor);
 
     for (int i = 0; i < fmSynth.getNumVoices(); ++i) {
         if (auto voice = dynamic_cast<FMVoice *>(fmSynth.getVoice(i))) {
-            voice->prepareToPlay(sampleRate, samplesPerBlock, this->getTotalNumOutputChannels());
+            voice->prepareToPlay(sampleRate * oversamplingFactor, samplesPerBlock, this->getTotalNumOutputChannels());
         }
     }
 }
@@ -164,7 +170,7 @@ void PercussionFMAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, 
             auto osc = Patches::generateOscillator(static_cast<Patches::Patch>(patchNum));
             auto voice = new FMVoice();
             voice->setCarrier(osc);
-            voice->prepareToPlay(getSampleRate(), getBlockSize(), getTotalNumOutputChannels());
+            voice->prepareToPlay(getSampleRate() * oversamplingFactor, getBlockSize(), getTotalNumOutputChannels());
 
             fmSynth.addVoice(voice);
         }
@@ -177,8 +183,34 @@ void PercussionFMAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, 
         }
     }
 
-    // Render the next block of output.
-    fmSynth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
+    // Set up a temporary, oversampled buffer.
+    juce::AudioBuffer<float> oversampledBuffer{getTotalNumOutputChannels(),
+                                               buffer.getNumSamples() * oversamplingFactor};
+    oversampledBuffer.clear();
+
+    // Render the next block of output to the oversampled buffer.
+    fmSynth.renderNextBlock(oversampledBuffer, midiMessages, 0, oversampledBuffer.getNumSamples());
+
+    // Half-band filter the oversampled buffer.
+//    filter.processBlock(oversampledBuffer, oversampledBuffer.getNumSamples());
+
+    for (int channel = 0; channel < oversampledBuffer.getNumChannels(); ++channel) {
+        for (int sample = 0; sample < oversampledBuffer.getNumSamples(); ++sample) {
+            oversampledBuffer.setSample(
+                    channel,
+                    sample,
+                    filter[channel].processSample(oversampledBuffer.getSample(channel, sample))
+            );
+        }
+    }
+
+    // Write the filtered samples to the output buffer.
+    for (int channel = 0; channel < buffer.getNumChannels(); ++channel) {
+        for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
+            auto newSample = oversampledBuffer.getSample(channel, sample * oversamplingFactor);
+            buffer.setSample(channel, sample, newSample);
+        }
+    }
 
     // If enabled, gather data to be displayed in the scope.
     if (scopeOn) {

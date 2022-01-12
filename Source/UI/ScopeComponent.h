@@ -213,12 +213,22 @@ private:
         auto center = rect.getBottom() - offset;
         auto gain = h * scaler;
 
-        for (size_t i = 1; i < numSamples; ++i)
+        for (size_t i = 1; i < numSamples; ++i) {
+            auto xEnd = center - gain * data[i - 1];
+            auto yEnd = center - gain * data[i];
+            if (std::isinf(xEnd) || std::isnan(xEnd)) {
+                xEnd = 0;
+            }
+            if (std::isinf(yEnd) || std::isnan(yEnd)) {
+                yEnd = 0;
+            }
+
             g.drawLine({juce::jmap(SampleType(i - 1), SampleType(0), SampleType(numSamples - 1), SampleType(right - w),
                                    SampleType(right)),
-                        center - gain * data[i - 1],
+                        xEnd,
                         juce::jmap(SampleType(i), SampleType(0), SampleType(numSamples - 1), SampleType(right - w),
                                    SampleType(right)),
-                        center - gain * data[i]});
+                        yEnd});
+        }
     }
 };

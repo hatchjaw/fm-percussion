@@ -104,7 +104,7 @@ public:
             osc.feedback = feedback;
             if (envelope) {
                 osc.setEnvelope(*envelope);
-                osc.envelopeSet = true;
+                osc.envelopeIsSet = true;
             }
             for (auto p: modulatorParams) {
                 osc.addModulator(p.generateOscillator());
@@ -171,7 +171,7 @@ private:
     double prevSample{0.0};
 
     OADEnv envelope;
-    bool envelopeSet{false};
+    bool envelopeIsSet{false};
 
     // A scaling factor applied to peak deviation and feedback.
     double modulationAmount{1.0};
