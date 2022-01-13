@@ -69,6 +69,11 @@ public:
 
         /**
          * Constructor to use for fixed-frequency modulation
+         *
+         * The overloaded constructor approach here isn't the best. Specifying ModulationMode::PROPORTIONAL will cause
+         * the resulting FMOsc to ignore the provided (fixed) modulation frequency and fall back to a modulation
+         * frequency ratio of 2.0.
+         *
          * @param modModeToUse
          * @param modFreqToUse
          * @param peakDeviationToUse

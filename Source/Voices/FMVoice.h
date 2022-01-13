@@ -22,15 +22,15 @@ public:
         Parameters() = default;
 
         Parameters(FMOsc::FMMode carrierModeToUse,
-                   std::vector<FMOsc::Parameters> modulatorSettingsToUse,
+                   std::vector<FMOsc::Parameters> modulatorParametersToUse,
                    OADEnv::Parameters *envParamsToUse)
                 : carrierMode(carrierModeToUse),
-                  modulatorSettings(std::move(modulatorSettingsToUse)),
+                  modulatorParameters(std::move(modulatorParametersToUse)),
                   envParams(envParamsToUse) {
         }
 
         FMOsc::FMMode carrierMode;
-        std::vector<FMOsc::Parameters> modulatorSettings;
+        std::vector<FMOsc::Parameters> modulatorParameters;
         OADEnv::Parameters *envParams;
     };
 

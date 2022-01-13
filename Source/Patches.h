@@ -34,7 +34,7 @@ public:
         auto params = getPatch(patch);
         auto carrier = new FMOsc(params->carrierMode);
 
-        for (auto s: params->modulatorSettings) {
+        for (auto s: params->modulatorParameters) {
             auto m = s.generateOscillator();
             carrier->addModulator(m);
         }
@@ -162,7 +162,7 @@ private:
             case FEEDBACK:
                 return new FMVoice::Parameters(
                         FMOsc::LINEAR,
-                        {FMOsc::Parameters(1.15, 1900, 0.5)},
+                        {FMOsc::Parameters(1.15, 1900, 0.2)},
                         new OADEnv::Parameters(0.5f, 0.5f, 3.5f)
                 );
             default:
