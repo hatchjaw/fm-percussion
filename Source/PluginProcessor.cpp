@@ -100,11 +100,13 @@ void PercussionFMAudioProcessor::changeProgramName(int index, const juce::String
 
 //==============================================================================
 void PercussionFMAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock) {
-    fmSynth.setCurrentPlaybackSampleRate(sampleRate * oversamplingFactor);
+    auto playbackSampleRate = currentAntialiasOnState ? sampleRate * oversamplingFactor : sampleRate;
+
+    fmSynth.setCurrentPlaybackSampleRate(playbackSampleRate);
 
     for (int i = 0; i < fmSynth.getNumVoices(); ++i) {
         if (auto voice = dynamic_cast<FMVoice *>(fmSynth.getVoice(i))) {
-            voice->prepareToPlay(sampleRate * oversamplingFactor, samplesPerBlock, this->getTotalNumOutputChannels());
+            voice->prepareToPlay(playbackSampleRate, samplesPerBlock, this->getTotalNumOutputChannels());
         }
     }
 }
@@ -157,9 +159,22 @@ void PercussionFMAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, 
 
     // Read parameter values from the value tree state.
     auto scopeOn = apvts.getRawParameterValue("SCOPE")->load() > .5f;
+    auto antialiasOn = apvts.getRawParameterValue("ANTIALIAS")->load() > .5f;
     auto patchNum = (int) apvts.getRawParameterValue("PATCH")->load();
     // Modulation amount appears to the user as a percentage; divide by 100 so it can be used as a scaling value.
     auto modAmount = apvts.getRawParameterValue("MOD_SCALE")->load() / 100.f;
+
+    // Check whether the antialising state has changed; if so, set the sample rate accordingly.
+    if (antialiasOn != currentAntialiasOnState) {
+        currentAntialiasOnState = antialiasOn;
+        auto playbackSampleRate = currentAntialiasOnState ? getSampleRate() * oversamplingFactor : getSampleRate();
+        fmSynth.setCurrentPlaybackSampleRate(playbackSampleRate);
+        for (int i = 0; i < fmSynth.getNumVoices(); ++i) {
+            if (auto voice = dynamic_cast<FMVoice *>(fmSynth.getVoice(i))) {
+                voice->prepareToPlay(playbackSampleRate, getBlockSize(), getTotalNumOutputChannels());
+            }
+        }
+    }
 
     // Check whether the patch number has changed; if so, load the new patch.
     if (patchNum != currentPatch) {
@@ -183,33 +198,29 @@ void PercussionFMAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, 
         }
     }
 
-    // Set up a temporary, oversampled buffer.
-    juce::AudioBuffer<float> oversampledBuffer{getTotalNumOutputChannels(),
-                                               buffer.getNumSamples() * oversamplingFactor};
-    oversampledBuffer.clear();
+    // If antialiasing is on, generate oversampled output, then decimate.
+    if (currentAntialiasOnState) {
+        // Set up a temporary, oversampled buffer.
+        juce::AudioBuffer<float> oversampledBuffer{getTotalNumOutputChannels(),
+                                                   buffer.getNumSamples() * oversamplingFactor};
+        oversampledBuffer.clear();
 
-    // Render the next block of output to the oversampled buffer.
-    fmSynth.renderNextBlock(oversampledBuffer, midiMessages, 0, oversampledBuffer.getNumSamples());
+        // Render the next block of output to the oversampled buffer.
+        fmSynth.renderNextBlock(oversampledBuffer, midiMessages, 0, oversampledBuffer.getNumSamples());
 
-    // Half-band filter the oversampled buffer.
-//    filter.processBlock(oversampledBuffer, oversampledBuffer.getNumSamples());
-
-    for (int channel = 0; channel < oversampledBuffer.getNumChannels(); ++channel) {
-        for (int sample = 0; sample < oversampledBuffer.getNumSamples(); ++sample) {
-            oversampledBuffer.setSample(
-                    channel,
-                    sample,
-                    filter[channel].processSample(oversampledBuffer.getSample(channel, sample))
-            );
+        // Decimate and write to the output buffer.
+        for (int channel = 0; channel < buffer.getNumChannels(); ++channel) {
+            // Halfband filter the current channel.
+            filter[channel].processBlock(oversampledBuffer, channel,oversampledBuffer.getNumSamples());
+            // Downsample and write to the output buffer.
+            for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
+                auto newSample = oversampledBuffer.getSample(channel, sample * oversamplingFactor);
+                buffer.setSample(channel, sample, newSample);
+            }
         }
-    }
-
-    // Write the filtered samples to the output buffer.
-    for (int channel = 0; channel < buffer.getNumChannels(); ++channel) {
-        for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
-            auto newSample = oversampledBuffer.getSample(channel, sample * oversamplingFactor);
-            buffer.setSample(channel, sample, newSample);
-        }
+    } else {
+        // Just render the next block of output directly to the output buffer.
+        fmSynth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
     }
 
     // If enabled, gather data to be displayed in the scope.
@@ -264,7 +275,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout PercussionFMAudioProcessor::
             "Chime 1",
             "Marimba",
             "Sheet Metal",
-            "Timpani"
+            "Timpani",
+            "Feedback experiment"
     }, 0));
 
     // Scalar for modulation index and feedback.
@@ -273,6 +285,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout PercussionFMAudioProcessor::
             "Mod amount",
             juce::NormalisableRange<float>(0.0f, 200.0f, 1.f),
             100.f));
+
+    params.push_back(std::make_unique<juce::AudioParameterBool>("ANTIALIAS", "Anti-aliasing on", true));
 
     return {params.begin(), params.end()};
 }

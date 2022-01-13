@@ -75,10 +75,12 @@ public:
 private:
     juce::Synthesiser fmSynth;
     AudioBufferQueue<float> audioBufferQueue;
-    ScopeDataCollector<float> scopeDataCollector { audioBufferQueue };
+    ScopeDataCollector<float> scopeDataCollector{audioBufferQueue};
     std::vector<LowPassFilter> filter;
+    bool currentAntialiasOnState{true};
     int currentPatch{0};
     const int oversamplingFactor{2};
+
     static juce::AudioProcessorValueTreeState::ParameterLayout createParams();
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PercussionFMAudioProcessor)

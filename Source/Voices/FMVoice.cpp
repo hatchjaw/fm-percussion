@@ -47,6 +47,7 @@ void FMVoice::pitchWheelMoved(int newPitchWheelValue) {
 }
 
 void FMVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int numOutputChannels) {
+    this->clearCurrentNote();
     juce::dsp::ProcessSpec spec;
     spec.maximumBlockSize = samplesPerBlock;
     spec.sampleRate = sampleRate;

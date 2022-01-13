@@ -12,6 +12,7 @@
 #include "PluginProcessor.h"
 #include "UI/ScopeComponent.h"
 #include "UI/ScopeOnOffComponent.h"
+#include "UI/FilterOnOffComponent.h"
 #include "UI/PatchSelectorComponent.h"
 #include "UI/ModulationAmountComponent.h"
 
@@ -34,6 +35,7 @@ private:
     PercussionFMAudioProcessor& audioProcessor;
     ScopeComponent<float> scopeComponent;
     ScopeOnOffComponent scopeOnOffComponent;
+    FilterOnOffComponent filterOnOffComponent;
     PatchSelectorComponent patchSelectorComponent;
     ModulationAmountComponent modulationAmountComponent;
 

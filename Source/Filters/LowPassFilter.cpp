@@ -44,17 +44,12 @@ float LowPassFilter::processSample(float input) noexcept {
     xPrev[0] = (double) input;
     yPrev[0] = output;
 
-//    if (std::fabs(output) < 1.0e-6) {
-//        output = 0.0;
-//    }
-
     return (float) output;
 }
 
-void LowPassFilter::processBlock(juce::AudioBuffer<float> buffer, int numSamples) {
-    for (int channel = 0; channel < buffer.getNumChannels(); ++channel) {
-        for (int sample = 0; sample < numSamples; ++sample) {
-
-        }
+void LowPassFilter::processBlock(juce::AudioBuffer<float> &buffer, int channelToProcess, int numSamples) {
+    for (int sample = 0; sample < numSamples; ++sample) {
+        auto newSample = processSample(buffer.getSample(channelToProcess, sample));
+        buffer.setSample(channelToProcess, sample, newSample);
     }
 }

@@ -26,7 +26,8 @@ public:
         CHIME1,
         MARIMBA,
         SHEET_METAL,
-        TIMPANI
+        TIMPANI,
+        FEEDBACK
     };
 
     static FMOsc *generateOscillator(Patch patch) {
@@ -112,7 +113,7 @@ private:
                                 FMOsc::Parameters(
                                         2.05,
                                         5.,
-                                        0.0,
+                                        0.1,
                                         FMOsc::LINEAR,
                                         new OADEnv::Parameters(0.0f, 0.0f, .75f)
                                 )
@@ -158,6 +159,12 @@ private:
                         new OADEnv::Parameters(0.8f, .125f * duration, .875f * duration)
                 );
             }
+            case FEEDBACK:
+                return new FMVoice::Parameters(
+                        FMOsc::LINEAR,
+                        {FMOsc::Parameters(1.15, 1900, 0.5)},
+                        new OADEnv::Parameters(0.5f, 0.5f, 3.5f)
+                );
             default:
                 jassertfalse;
                 break;

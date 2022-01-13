@@ -27,6 +27,10 @@
         <FILE id="BZV0de" name="FMVoice.h" compile="0" resource="0" file="Source/Voices/FMVoice.h"/>
       </GROUP>
       <GROUP id="{6809EF8C-8E70-E3C8-177A-2212C3534935}" name="UI">
+        <FILE id="PN8RAI" name="FilterOnOffComponent.cpp" compile="1" resource="0"
+              file="Source/UI/FilterOnOffComponent.cpp"/>
+        <FILE id="tQWyef" name="FilterOnOffComponent.h" compile="0" resource="0"
+              file="Source/UI/FilterOnOffComponent.h"/>
         <FILE id="fPykuB" name="ModulationAmountComponent.cpp" compile="1"
               resource="0" file="Source/UI/ModulationAmountComponent.cpp"/>
         <FILE id="pH3s4v" name="ModulationAmountComponent.h" compile="0" resource="0"

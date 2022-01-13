@@ -18,6 +18,7 @@ void FMOsc::addModulator(FMOsc modulatorToAdd) {
 
 void FMOsc::prepareToPlay(juce::dsp::ProcessSpec &spec) {
     this->sampleRate = spec.sampleRate;
+    this->reset();
     this->envelope.setSampleRate(spec.sampleRate);
 
     for (auto &modulator: modulators) {

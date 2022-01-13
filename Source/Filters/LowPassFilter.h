@@ -20,7 +20,7 @@ public:
 
     float processSample(float input) noexcept;
 
-    void processBlock(juce::AudioBuffer<float> buffer, int numSamples);
+    void processBlock(juce::AudioBuffer<float> &buffer, int channelToProcess, int numSamples);
 
 private:
 //    const double b0{8.80046409745677e-05};

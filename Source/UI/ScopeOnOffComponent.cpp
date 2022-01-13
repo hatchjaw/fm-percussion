@@ -41,6 +41,6 @@ void ScopeOnOffComponent::paint (juce::Graphics& g)
 
 void ScopeOnOffComponent::resized()
 {
-    scopeOnOffLabel.setBounds(0, 0, getWidth() / 2, getHeight());
-    scopeOnOffButton.setBounds(scopeOnOffLabel.getRight(), scopeOnOffLabel.getY(), getWidth() / 2, getHeight());
+    scopeOnOffLabel.setBounds(0, 0, 2 * getWidth() / 3, getHeight());
+    scopeOnOffButton.setBounds(scopeOnOffLabel.getRight(), scopeOnOffLabel.getY(), getWidth() / 3, getHeight());
 }
