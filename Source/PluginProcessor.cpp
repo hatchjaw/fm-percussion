@@ -276,6 +276,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout PercussionFMAudioProcessor::
             "Marimba",
             "Sheet Metal",
             "Timpani",
+            "Snare",
             "Feedback experiment"
     }, 0));
 

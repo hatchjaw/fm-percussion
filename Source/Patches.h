@@ -27,6 +27,7 @@ public:
         MARIMBA,
         SHEET_METAL,
         TIMPANI,
+        SNARE,
         FEEDBACK
     };
 
@@ -159,6 +160,27 @@ private:
                         new OADEnv::Parameters(0.8f, .125f * duration, .875f * duration)
                 );
             }
+            case SNARE:
+                return new FMVoice::Parameters(
+                        FMOsc::EXPONENTIAL,
+                        {
+                                FMOsc::Parameters(
+                                        1.15,
+                                        52,
+                                        2.5,
+                                        FMOsc::LINEAR,
+                                        new OADEnv::Parameters(0.f, 0.f, 20.f)
+                                ),
+                                FMOsc::Parameters(
+                                        1.85,
+                                        90,
+                                        1.5,
+                                        FMOsc::LINEAR,
+                                        new OADEnv::Parameters(0.f, 0.f, 20.f)
+                                )
+                        },
+                        new OADEnv::Parameters(0.f, 0.f, .2f)
+                );
             case FEEDBACK:
                 return new FMVoice::Parameters(
                         FMOsc::LINEAR,
